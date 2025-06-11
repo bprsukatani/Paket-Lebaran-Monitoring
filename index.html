@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | My App</title>
+    <title>Login / Daftar | BPR Monitoring</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -11,12 +11,12 @@
         <h2 id="authTitle">Login</h2>
         <form id="authForm">
             <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" required>
+                <label for="email">Email / ID Pengguna (1111):</label>
+                <input type="text" id="email" required placeholder="Masukkan Email atau '1111'">
             </div>
             <div class="form-group">
                 <label for="password">Password:</label>
-                <input type="password" id="password" required>
+                <input type="password" id="password" required placeholder="Masukkan Password atau 'admin'">
             </div>
             <div class="form-group">
                 <button type="submit" id="authButton">Login</button>
@@ -28,6 +28,7 @@
         </div>
     </div>
 
+    <!-- Firebase SDK (Pastikan versi terbaru) -->
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
