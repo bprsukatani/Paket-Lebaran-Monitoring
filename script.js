@@ -1,6 +1,7 @@
 // script.js
 
 // === Konfigurasi Firebase Anda ===
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
   apiKey: "AIzaSyBFzJr48Y8F3_S_d6t_Qlg3NinlyLvFiGU",
   authDomain: "bpr-monitoring.firebaseapp.com",
@@ -8,7 +9,7 @@ const firebaseConfig = {
   storageBucket: "bpr-monitoring.firebasestorage.app",
   messagingSenderId: "787451089590",
   appId: "1:787451089590:web:23e008144972a5cecc0c17",
-  measurementId: "G-SNE62EWQVL" // Opsional
+  measurementId: "G-SNE62EWQVL"
 };
 
 // Inisialisasi Firebase
