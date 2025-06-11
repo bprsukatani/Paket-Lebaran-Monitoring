@@ -1,131 +1,78 @@
-/* style.css */
 body {
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f0f2f5;
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 100vh;
     margin: 0;
-    color: #333;
 }
 
 .container {
-    background-color: #ffffff;
-    padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    width: 380px;
+    background-color: #fff;
+    padding: 20px 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
     text-align: center;
-    box-sizing: border-box;
 }
 
-h1, h2 {
-    color: #007bff;
-    margin-bottom: 25px;
+h2 {
+    color: #333;
+    margin-bottom: 20px;
 }
 
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 15px;
     text-align: left;
 }
 
-.form-group label {
+label {
     display: block;
-    margin-bottom: 8px;
-    font-weight: bold;
+    margin-bottom: 5px;
     color: #555;
 }
 
-.form-group input[type="email"],
-.form-group input[type="password"],
-.form-group input[type="text"] {
-    width: calc(100% - 22px); /* Adjust for padding and border */
-    padding: 12px;
+input[type="text"],
+input[type="password"] {
+    width: calc(100% - 20px);
+    padding: 10px;
     border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 16px;
+    border-radius: 4px;
     box-sizing: border-box;
 }
 
-.form-group button {
-    width: 100%;
-    padding: 12px;
+button {
     background-color: #007bff;
     color: white;
+    padding: 10px 15px;
     border: none;
-    border-radius: 6px;
-    font-size: 18px;
+    border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
+    font-size: 16px;
+    width: 100%;
 }
 
-.form-group button:hover {
+button:hover {
     background-color: #0056b3;
 }
 
-#authMessage, #balanceMessage {
-    margin-top: 15px;
-    padding: 10px;
-    border-radius: 5px;
-    color: #fff;
+.error-message {
+    color: red;
+    margin-top: 10px;
+}
+
+/* Styling for user.html */
+#userBalance {
     font-weight: bold;
-    display: none; /* Hidden by default */
+    color: #28a745;
 }
 
-#authMessage.error, #balanceMessage.error {
-    background-color: #dc3545; /* Red for errors */
-}
-
-#authMessage.success, #balanceMessage.success {
-    background-color: #28a745; /* Green for success */
-}
-
-.switch-auth {
+#logoutButton {
     margin-top: 20px;
-    font-size: 14px;
+    background-color: #dc3545;
 }
 
-.switch-auth button {
-    background: none;
-    border: none;
-    color: #007bff;
-    text-decoration: underline;
-    cursor: pointer;
-    padding: 0;
-    font-size: 14px;
+#logoutButton:hover {
+    background-color: #c82333;
 }
-
-/* Home Page Specifics */
-.home-content {
-    margin-top: 20px;
-    text-align: left;
-}
-
-.home-content p {
-    font-size: 1.1em;
-    line-height: 1.6;
-}
-
-#balanceDisplay {
-    font-size: 2.2em;
-    font-weight: bold;
-    color: #28a745; /* Green for balance */
-    margin-bottom: 20px;
-    display: block; /* Ensure it takes full width */
-}
-
-#userEmailDisplay {
-    font-size: 1.1em;
-    color: #666;
-    margin-bottom: 15px;
-}
-
-#logoutBtn {
-    background-color: #6c757d;
-    margin-top: 30px;
-}
-
-#logoutBtn:hover {
-    background-color: #5a6268;
-  }
