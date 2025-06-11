@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Welcome, <span id="welcomeUsername"></span>!</h2>
+        <p>Your current balance: <span id="userBalance"></span></p>
+        <button id="logoutButton">Logout</button>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+    <script>
+        // Ambil data pengguna dari sessionStorage
+        const loggedInUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+
+        if (loggedInUser) {
+            document.getElementById('welcomeUsername').textContent = loggedInUser.username;
+            document.getElementById('userBalance').textContent = formatRupiah(loggedInUser.balance);
+        } else {
+            // Jika tidak ada pengguna yang login, arahkan kembali ke halaman login
+            window.location.href = 'index.html';
+        }
+
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            sessionStorage.removeItem('loggedInUser');
+            window.location.href = 'index.html';
+        });
+
+        function formatRupiah(angka) {
+            let reverse = angka.toString().split('').reverse().join('');
+            let ribuan = reverse.match(/\d{1,3}/g);
+            let result = ribuan.join('.').split('').reverse().join('');
+            return 'Rp ' + result;
+        }
+    </script>
+</body>
+</html>
