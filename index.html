@@ -1,38 +1,31 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login / Daftar | BPR Monitoring</title>
+    <title>Login</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container" id="authContainer">
-        <h2 id="authTitle">Login</h2>
-        <form id="authForm">
+    <div class="container">
+        <h2>Login</h2>
+        <form id="loginForm">
             <div class="form-group">
-                <label for="email">Email / ID Pengguna (1111):</label>
-                <input type="text" id="email" required placeholder="Masukkan Email atau '1111'">
+                <label for="username">Username:</label>
+                <input type="text" id="username" required>
             </div>
             <div class="form-group">
                 <label for="password">Password:</label>
-                <input type="password" id="password" required placeholder="Masukkan Password atau 'admin'">
+                <input type="password" id="password" required>
             </div>
-            <div class="form-group">
-                <button type="submit" id="authButton">Login</button>
-            </div>
+            <button type="submit">Login</button>
+            <p id="errorMessage" class="error-message"></p>
         </form>
-        <div id="authMessage"></div>
-        <div class="switch-auth">
-            <p id="switchText">Belum punya akun? <button type="button" id="toggleAuthMode">Daftar Sekarang</button></p>
-        </div>
     </div>
 
-    <!-- Firebase SDK (Pastikan versi terbaru) -->
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-    
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
     <script src="script.js"></script>
 </body>
 </html>
