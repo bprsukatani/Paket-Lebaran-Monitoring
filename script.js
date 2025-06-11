@@ -1,15 +1,14 @@
 // script.js
 
 // === Konfigurasi Firebase Anda ===
-// GANTI DENGAN KONFIGURASI PROYEK FIREBASE ANDA SENDIRI!
 const firebaseConfig = {
-      apiKey: "AIzaSyBFzJr48Y8F3_S_d6t_Qlg3NinlyLvFiGU",
-      authDomain: "bpr-monitoring.firebaseapp.com",
-      projectId: "bpr-monitoring",
-      storageBucket: "bpr-monitoring.firebasestorage.app",
-      messagingSenderId: "787451089590",
-      appId: "1:787451089590:web:23e008144972a5cecc0c17",
-      measurementId: "G-SNE62EWQVL"
+  apiKey: "AIzaSyBFzJr48Y8F3_S_d6t_Qlg3NinlyLvFiGU",
+  authDomain: "bpr-monitoring.firebaseapp.com",
+  projectId: "bpr-monitoring",
+  storageBucket: "bpr-monitoring.firebasestorage.app",
+  messagingSenderId: "787451089590",
+  appId: "1:787451089590:web:23e008144972a5cecc0c17",
+  measurementId: "G-SNE62EWQVL" // Opsional
 };
 
 // Inisialisasi Firebase
@@ -18,6 +17,12 @@ firebase.initializeApp(firebaseConfig);
 // Dapatkan referensi ke layanan Firebase
 const auth = firebase.auth();
 const db = firebase.firestore();
+
+// --- Konstanta untuk Pengguna Default ---
+const DEFAULT_USER_ID = '1111';
+const DEFAULT_PASSWORD = 'admin';
+const DEFAULT_BALANCE = 1000000; // Saldo default untuk pengguna '1111'
+const LOCAL_STORAGE_DEFAULT_USER_KEY = 'bprMonitoringDefaultUserLoggedIn';
 
 // --- Fungsi Helper untuk Menampilkan Pesan ---
 function showMessage(elementId, message, type) {
@@ -50,8 +55,9 @@ if (document.getElementById('authContainer')) {
     
     let isLoginMode = true; // State untuk mode login atau daftar
 
-    toggleAuthModeBtn.addEventListener('click', () => {
-        isLoginMode = !isLoginMode;
+    // Fungsi untuk mengubah mode UI antara login dan daftar
+    function toggleAuthUI(toLoginMode) {
+        isLoginMode = toLoginMode;
         if (isLoginMode) {
             authTitle.textContent = 'Login';
             authButton.textContent = 'Login';
@@ -61,24 +67,37 @@ if (document.getElementById('authContainer')) {
             authButton.textContent = 'Daftar';
             switchText.innerHTML = 'Sudah punya akun? <button type="button" id="toggleAuthMode">Login</button>';
         }
-        // Re-attach event listener because innerHTML replaces it
+        // Pasang kembali event listener karena innerHTML menggantikan elemen
         document.getElementById('toggleAuthMode').addEventListener('click', () => {
-            toggleAuthModeBtn.click(); // Simulate click on the original button
+            toggleAuthUI(!isLoginMode); // Panggil fungsi dengan mode berlawanan
         });
-        hideMessage('authMessage'); // Clear messages on mode switch
-    });
+        hideMessage('authMessage'); // Sembunyikan pesan sebelumnya
+    }
 
+    // Event listener untuk tombol toggle mode
+    toggleAuthModeBtn.addEventListener('click', () => toggleAuthUI(!isLoginMode));
+
+    // Event listener untuk submit form
     authForm.addEventListener('submit', async (e) => {
         e.preventDefault(); // Mencegah submit form default
         hideMessage('authMessage'); // Sembunyikan pesan sebelumnya
 
-        const email = emailInput.value;
-        const password = passwordInput.value;
+        const emailOrId = emailInput.value.trim();
+        const password = passwordInput.value.trim();
 
+        // --- Cek Pengguna Default (1111/admin) ---
+        if (isLoginMode && emailOrId === DEFAULT_USER_ID && password === DEFAULT_PASSWORD) {
+            localStorage.setItem(LOCAL_STORAGE_DEFAULT_USER_KEY, 'true'); // Tandai login default
+            showMessage('authMessage', 'Login Pengguna Default Berhasil! Mengarahkan...', 'success');
+            window.location.href = 'home.html';
+            return; // Hentikan eksekusi lebih lanjut
+        }
+
+        // --- Logika Autentikasi Firebase ---
         if (isLoginMode) {
-            // Logika Login
+            // Logika Login Firebase
             try {
-                await auth.signInWithEmailAndPassword(email, password);
+                await auth.signInWithEmailAndPassword(emailOrId, password);
                 showMessage('authMessage', 'Login Berhasil! Mengarahkan...', 'success');
                 window.location.href = 'home.html'; // Arahkan ke halaman utama
             } catch (error) {
@@ -86,25 +105,27 @@ if (document.getElementById('authContainer')) {
                 showMessage('authMessage', `Error login: ${error.message}`, 'error');
             }
         } else {
-            // Logika Daftar
+            // Logika Daftar Firebase
+            // Pastikan email bukan '1111' karena itu ID pengguna default lokal
+            if (emailOrId === DEFAULT_USER_ID) {
+                 showMessage('authMessage', 'ID Pengguna ' + DEFAULT_USER_ID + ' tidak dapat digunakan untuk pendaftaran Firebase. Harap gunakan email.', 'error');
+                 return;
+            }
+
             try {
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const userCredential = await auth.createUserWithEmailAndPassword(emailOrId, password);
                 // Tambahkan data user ke Firestore setelah berhasil daftar
+                // Set saldo awal 0 untuk pengguna baru Firebase
                 await db.collection('users').doc(userCredential.user.uid).set({
                     email: userCredential.user.email,
+                    balance: 0, // Saldo awal untuk pengguna baru Firebase
                     createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    // Tambahkan bidang lain yang Anda inginkan
                 });
                 showMessage('authMessage', 'Pendaftaran Berhasil! Silakan login.', 'success');
                 // Alihkan ke mode login setelah daftar
-                isLoginMode = true;
-                authTitle.textContent = 'Login';
-                authButton.textContent = 'Login';
-                switchText.innerHTML = 'Belum punya akun? <button type="button" id="toggleAuthMode">Daftar Sekarang</button>';
-                 // Re-attach event listener
-                document.getElementById('toggleAuthMode').addEventListener('click', () => {
-                    toggleAuthModeBtn.click();
-                });
+                toggleAuthUI(true); // Kembali ke mode login
+                emailInput.value = emailOrId; // Isi kembali email untuk memudahkan login
+                passwordInput.value = '';
             } catch (error) {
                 console.error('Error daftar:', error.message);
                 showMessage('authMessage', `Error daftar: ${error.message}`, 'error');
@@ -114,92 +135,111 @@ if (document.getElementById('authContainer')) {
 
     // Cek status login saat halaman dimuat
     auth.onAuthStateChanged(user => {
-        if (user) {
-            // Pengguna sudah login, arahkan ke halaman utama
-            console.log('User sudah login:', user.email);
+        // Jika ada pengguna Firebase yang login ATAU ada flag pengguna default
+        if (user || localStorage.getItem(LOCAL_STORAGE_DEFAULT_USER_KEY) === 'true') {
+            console.log('Pengguna sudah login atau default user terdeteksi. Mengarahkan ke home.html');
             window.location.href = 'home.html';
         } else {
-            // Pengguna belum login
-            console.log('User belum login');
+            console.log('Tidak ada pengguna yang login.');
         }
     });
 }
 
 // --- Logika untuk Halaman Utama (home.html) ---
-if (document.getElementById('userDataList')) {
+if (document.getElementById('balanceDisplay')) {
     const logoutBtn = document.getElementById('logoutBtn');
-    const userDataList = document.getElementById('userDataList');
-    const addDataBtn = document.getElementById('addDataBtn');
-    const newDataInput = document.getElementById('newDataInput');
+    const userEmailDisplay = document.getElementById('userEmailDisplay');
+    const balanceDisplay = document.getElementById('balanceDisplay');
+    const updateBalanceBtn = document.getElementById('updateBalanceBtn');
+    const newBalanceInput = document.getElementById('newBalanceInput');
+    const balanceMessage = document.getElementById('balanceMessage');
+    const updateBalanceSection = document.querySelector('.home-content h3:nth-of-type(2)').parentElement; // Dapatkan bagian "Perbarui Saldo"
 
     // Cek status login saat halaman utama dimuat
     auth.onAuthStateChanged(async (user) => {
+        const isDefaultUserLoggedIn = localStorage.getItem(LOCAL_STORAGE_DEFAULT_USER_KEY) === 'true';
+
         if (user) {
-            console.log('User di halaman utama:', user.email);
-            // Ambil dan tampilkan data
-            fetchUserData(user.uid);
-        } else {
-            // Jika belum login, arahkan kembali ke halaman login
-            console.log('Tidak ada user di halaman utama, kembali ke login.');
+            // Pengguna Firebase Login
+            console.log('Pengguna Firebase di halaman utama:', user.email);
+            userEmailDisplay.textContent = `Email: ${user.email}`;
+            // Tampilkan bagian update saldo
+            updateBalanceSection.style.display = 'block'; 
+            fetchUserBalance(user.uid); // Ambil saldo dari Firestore
+        } else if (isDefaultUserLoggedIn) {
+            // Pengguna Default Login (1111/admin)
+            console.log('Pengguna Default (1111/admin) di halaman utama.');
+            userEmailDisplay.textContent = `ID Pengguna: ${DEFAULT_USER_ID}`;
+            balanceDisplay.textContent = `Rp ${DEFAULT_BALANCE.toLocaleString('id-ID')}`;
+            balanceDisplay.style.color = '#007bff'; // Warna berbeda untuk default
+            // Sembunyikan bagian update saldo karena pengguna default tidak punya data di Firestore
+            updateBalanceSection.style.display = 'none'; 
+        }
+        else {
+            // Tidak ada yang login, arahkan kembali ke halaman login
+            console.log('Tidak ada pengguna yang login, kembali ke index.html.');
             window.location.href = 'index.html';
         }
     });
 
-    // Fungsi untuk mengambil data dari Firestore
-    async function fetchUserData(uid) {
-        userDataList.innerHTML = '<li>Memuat data...</li>'; // Tampilkan pesan loading
-        hideMessage('dataMessage');
+    // Fungsi untuk mengambil saldo dari Firestore
+    async function fetchUserBalance(uid) {
+        balanceDisplay.textContent = 'Memuat saldo...';
+        hideMessage('balanceMessage');
         try {
-            // Ambil koleksi 'items' yang spesifik untuk pengguna ini
             const userDocRef = db.collection('users').doc(uid);
-            const userItemsRef = userDocRef.collection('items').orderBy('createdAt', 'desc');
-            
-            userItemsRef.onSnapshot((snapshot) => { // Menggunakan onSnapshot untuk real-time update
-                userDataList.innerHTML = ''; // Kosongkan daftar sebelum mengisi ulang
-                if (snapshot.empty) {
-                    userDataList.innerHTML = '<li>Tidak ada data tersimpan.</li>';
-                } else {
-                    snapshot.forEach(doc => {
-                        const data = doc.data();
-                        const li = document.createElement('li');
-                        li.textContent = data.name + (data.createdAt ? ` (Ditambahkan: ${new Date(data.createdAt.toDate()).toLocaleString()})` : '');
-                        userDataList.appendChild(li);
-                    });
-                }
-                showMessage('dataMessage', 'Data berhasil dimuat.', 'success');
-            }, (error) => {
-                console.error('Error fetching real-time data:', error);
-                showMessage('dataMessage', `Error memuat data: ${error.message}`, 'error');
-            });
+            const doc = await userDocRef.get(); // Dapatkan dokumen pengguna
 
+            if (doc.exists) {
+                const data = doc.data();
+                if (data && typeof data.balance === 'number') {
+                    balanceDisplay.textContent = `Rp ${data.balance.toLocaleString('id-ID')}`;
+                    showMessage('balanceMessage', 'Saldo berhasil dimuat.', 'success');
+                } else {
+                    balanceDisplay.textContent = 'Saldo: Tidak Tersedia';
+                    showMessage('balanceMessage', 'Data saldo tidak ditemukan atau tidak valid.', 'error');
+                }
+            } else {
+                balanceDisplay.textContent = 'Saldo: Belum Ada Data';
+                showMessage('balanceMessage', 'Dokumen pengguna tidak ditemukan.', 'error');
+                // Ini bisa terjadi jika pengguna terdaftar via auth tapi dokumen di Firestore belum dibuat
+                // Atau jika ada masalah dengan UID
+            }
         } catch (error) {
-            console.error('Error fetching user data:', error);
-            showMessage('dataMessage', `Error memuat data: ${error.message}`, 'error');
-            userDataList.innerHTML = '<li>Gagal memuat data.</li>';
+            console.error('Error fetching balance:', error);
+            balanceDisplay.textContent = 'Gagal memuat saldo.';
+            showMessage('balanceMessage', `Error memuat saldo: ${error.message}`, 'error');
         }
     }
 
-    // Tambah data baru
-    if (addDataBtn) {
-        addDataBtn.addEventListener('click', async () => {
-            const itemName = newDataInput.value.trim();
+    // Fungsi untuk memperbarui saldo di Firestore (hanya untuk pengguna Firebase)
+    if (updateBalanceBtn) {
+        updateBalanceBtn.addEventListener('click', async () => {
+            const newBalance = parseFloat(newBalanceInput.value);
             const user = auth.currentUser;
 
-            if (itemName && user) {
-                try {
-                    // Tambahkan item ke sub-koleksi 'items' di dalam dokumen user
-                    await db.collection('users').doc(user.uid).collection('items').add({
-                        name: itemName,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp() // Timestamp server
-                    });
-                    newDataInput.value = ''; // Kosongkan input
-                    showMessage('dataMessage', 'Data berhasil ditambahkan!', 'success');
-                } catch (error) {
-                    console.error('Error adding data:', error);
-                    showMessage('dataMessage', `Error menambahkan data: ${error.message}`, 'error');
-                }
-            } else {
-                showMessage('dataMessage', 'Mohon masukkan nama item.', 'error');
+            if (!user) {
+                showMessage('balanceMessage', 'Anda harus login sebagai pengguna Firebase untuk memperbarui saldo.', 'error');
+                return;
+            }
+            if (isNaN(newBalance) || newBalance < 0) {
+                showMessage('balanceMessage', 'Mohon masukkan angka saldo yang valid (positif).', 'error');
+                return;
+            }
+            
+            hideMessage('balanceMessage'); // Sembunyikan pesan sebelumnya
+
+            try {
+                const userDocRef = db.collection('users').doc(user.uid);
+                await userDocRef.update({
+                    balance: newBalance
+                });
+                newBalanceInput.value = ''; // Kosongkan input
+                showMessage('balanceMessage', 'Saldo berhasil diperbarui!', 'success');
+                fetchUserBalance(user.uid); // Muat ulang saldo untuk tampilan
+            } catch (error) {
+                console.error('Error updating balance:', error);
+                showMessage('balanceMessage', `Error memperbarui saldo: ${error.message}`, 'error');
             }
         });
     }
@@ -208,13 +248,16 @@ if (document.getElementById('userDataList')) {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
             try {
-                await auth.signOut();
+                // Hapus flag pengguna default dari local storage
+                localStorage.removeItem(LOCAL_STORAGE_DEFAULT_USER_KEY); 
+                await auth.signOut(); // Logout dari Firebase
                 console.log('Logout berhasil.');
                 window.location.href = 'index.html'; // Arahkan kembali ke halaman login
             } catch (error) {
                 console.error('Error logout:', error);
-                alert(`Error logout: ${error.message}`);
+                alert(`Error logout: ${error.message}`); // Menggunakan alert karena ini situasi darurat logout
             }
         });
     }
-}
+      }
+                                                                   
