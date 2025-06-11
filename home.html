@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halaman Utama | My App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Selamat Datang!</h1>
+        <p>Anda berhasil login.</p>
+        <div class="home-content">
+            <h2>Data dari Firestore:</h2>
+            <ul id="userDataList">
+                <li>Memuat data...</li>
+            </ul>
+            <div id="dataMessage"></div>
+            
+            <hr style="margin-top: 30px; margin-bottom: 30px;">
+            <h3>Tambah Data Baru:</h3>
+            <div class="form-group">
+                <label for="newDataInput">Masukkan Item Baru:</label>
+                <input type="text" id="newDataInput" placeholder="Contoh: Belajar Firebase">
+            </div>
+            <div class="form-group">
+                <button id="addDataBtn">Tambah Data</button>
+            </div>
+        </div>
+        <div class="form-group">
+            <button id="logoutBtn">Logout</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
